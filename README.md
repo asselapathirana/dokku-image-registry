@@ -6,6 +6,7 @@ Automated provisioning of a Docker image registry running on a Dokku host.
 
 - Dokku installed and working on the remote server.
 - Passwordless SSH access from your machine to the Dokku host.
+- If you use a non-root SSH user, it must have passwordless `sudo` for Dokku and for writing under `/var/lib/dokku/data/storage`.
 - DNS for your registry domain pointing at the Dokku server (if using a custom domain).
 
 ## Usage
@@ -13,7 +14,7 @@ Automated provisioning of a Docker image registry running on a Dokku host.
 From this directory:
 
 ```bash
-export DOKKU_HOST="dokku@example.com"          # or user@example.com
+export DOKKU_HOST="root@example.com"           # or user@example.com (must be a normal OS user, not 'dokku')
 export REGISTRY_APP="registry"                 # optional
 export REGISTRY_DOMAIN="registry.example.com"  # optional
 export REGISTRY_USERNAME="registry"            # optional
