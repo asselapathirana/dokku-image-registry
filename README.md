@@ -25,3 +25,10 @@ export ENABLE_LETSENCRYPT="1"                  # optional
 
 The script is idempotent: you can re-run it to converge the remote Dokku host
 to the desired registry configuration without manual commands.
+
+Registry image data is stored persistently on the Dokku host under:
+
+- `/var/lib/dokku/data/storage/<REGISTRY_APP>/data`
+
+This directory is mounted into the registry container at `/var/lib/registry`,
+so images survive container restarts and redeploys.
