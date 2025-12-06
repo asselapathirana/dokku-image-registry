@@ -7,6 +7,7 @@ Automated provisioning of a Docker image registry running on a Dokku host.
 - Dokku installed and working on the remote server.
 - Passwordless SSH access from your machine to the Dokku host.
 - If you use a non-root SSH user, it must have passwordless `sudo` for Dokku and for writing under `/var/lib/dokku/data/storage`.
+- `htpasswd` available on the Dokku host (e.g. via the `apache2-utils` package) for creating bcrypt-based registry credentials.
 - DNS for your registry domain pointing at the Dokku server (if using a custom domain).
 
 ## Usage
@@ -18,8 +19,7 @@ export DOKKU_HOST="root@example.com"           # or user@example.com (must be a 
 export REGISTRY_APP="registry"                 # optional
 export REGISTRY_DOMAIN="registry.example.com"  # optional
 export REGISTRY_USERNAME="registry"            # optional
-export REGISTRY_PASSWORD="change-me"           # recommended
-export ENABLE_LETSENCRYPT="1"                  # optional
+export REGISTRY_PASSWORD="change-me"           # required
 
 ./deploy-registry.sh
 ```
@@ -33,6 +33,13 @@ Registry image data is stored persistently on the Dokku host under:
 
 This directory is mounted into the registry container at `/var/lib/registry`,
 so images survive container restarts and redeploys.
+
+After HTTP is working and you can log in and push images, you can enable HTTPS
+with Dokku's Let's Encrypt plugin, for example:
+
+```bash
+ssh dokku@example.com letsencrypt:enable registry
+```
 
 ## Testing with GitHub Actions
 
@@ -48,7 +55,7 @@ In your GitHub repository settings, define these secrets:
 - `DOKKU_REGISTRY_PASSWORD` – same value you used for `REGISTRY_PASSWORD`
 
 Ensure your registry is reachable from the public internet (or from GitHub’s
-runners) and uses a valid TLS certificate (e.g. via `ENABLE_LETSENCRYPT=1`).
+runners) and uses a valid TLS certificate (e.g. via Dokku's `letsencrypt:enable`).
 
 ### Run the workflow
 
