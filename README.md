@@ -62,8 +62,13 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      APP_NAME: your-app
     steps:
       - uses: actions/checkout@v4
+
+      - name: Derive content tag
+        run: echo "TAG_MD5=$(git rev-parse HEAD | md5sum | cut -d' ' -f1)" >> $GITHUB_ENV
 
       - name: Log in to Dokku registry
         uses: docker/login-action@v3
@@ -77,10 +82,13 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOKKU_REGISTRY_URL }}/your-app:latest
+          tags: |
+            ${{ secrets.DOKKU_REGISTRY_URL }}/${{ env.APP_NAME }}:latest
+            ${{ secrets.DOKKU_REGISTRY_URL }}/${{ env.APP_NAME }}:${{ env.TAG_MD5 }}
 ```
 
-- Replace `your-app` with your image name (optionally include branch/commit tags).
+- Replace `your-app` in `APP_NAME` with your image name.
+- The workflow pushes both a stable `latest` tag and a content-derived MD5 tag so deployment tools (e.g. Argo CD) can detect new images deterministically.
 - If you use a custom port, include it in `DOKKU_REGISTRY_URL` (e.g. `registry.example.com:5000`).
 - For private repos, keep these secrets at the repo level; for org-wide reuse, use org secrets.
 
