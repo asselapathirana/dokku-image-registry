@@ -41,30 +41,48 @@ with Dokku's Let's Encrypt plugin, for example:
 ssh dokku@example.com letsencrypt:enable registry
 ```
 
-## Testing with GitHub Actions
+## Using with GitHub Actions
 
-This repo includes a simple GitHub Actions workflow that builds and pushes a
-tiny test image to your Dokku registry.
+You can build and push images to this registry from GitHub Actions runners.
 
-### Configure GitHub secrets
+1. Confirm your registry is reachable from GitHub (public HTTPS with a valid cert).
+2. In your repo settings, add secrets:
+   - `DOKKU_REGISTRY_URL` (e.g. `registry.example.com`)
+   - `DOKKU_REGISTRY_USERNAME`
+   - `DOKKU_REGISTRY_PASSWORD`
+3. Add a workflow like:
 
-In your GitHub repository settings, define these secrets:
+```yaml
+name: Build and push to Dokku registry
 
-- `DOKKU_REGISTRY_URL` – e.g. `registry.example.com`
-- `DOKKU_REGISTRY_USERNAME` – same value you used for `REGISTRY_USERNAME`
-- `DOKKU_REGISTRY_PASSWORD` – same value you used for `REGISTRY_PASSWORD`
+on:
+  push:
+    branches: [main]
 
-Ensure your registry is reachable from the public internet (or from GitHub’s
-runners) and uses a valid TLS certificate (e.g. via Dokku's `letsencrypt:enable`).
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-### Run the workflow
+      - name: Log in to Dokku registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOKKU_REGISTRY_URL }}
+          username: ${{ secrets.DOKKU_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOKKU_REGISTRY_PASSWORD }}
 
-- Go to “Actions” in GitHub, select “Push test image to Dokku registry”.
-- Use “Run workflow” to trigger it.
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOKKU_REGISTRY_URL }}/your-app:latest
+```
 
-If it succeeds, you should see `dokkuregistry-test:latest` in your registry:
-
-- `docker pull registry.example.com/dokkuregistry-test:latest`
+- Replace `your-app` with your image name (optionally include branch/commit tags).
+- If you use a custom port, include it in `DOKKU_REGISTRY_URL` (e.g. `registry.example.com:5000`).
+- For private repos, keep these secrets at the repo level; for org-wide reuse, use org secrets.
 
 ## Local testing script
 
