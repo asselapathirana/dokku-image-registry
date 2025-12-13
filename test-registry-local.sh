@@ -25,8 +25,8 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
-REGISTRY_DOMAIN="${REGISTRY_DOMAIN:-}"
-REGISTRY_USERNAME="${REGISTRY_USERNAME:-}"
+REGISTRY_DOMAIN="${REGISTRY_DOMAIN:-registry.srv.pathirana.net}"
+REGISTRY_USERNAME="${REGISTRY_USERNAME:-registry}"
 REGISTRY_PASSWORD="${REGISTRY_PASSWORD:-}"
 
 if [[ -z "${REGISTRY_DOMAIN}" || -z "${REGISTRY_USERNAME}" || -z "${REGISTRY_PASSWORD}" ]]; then
